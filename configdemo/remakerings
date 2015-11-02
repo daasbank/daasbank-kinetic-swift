@@ -1,0 +1,29 @@
+#!/bin/bash
+
+cd /etc/swift
+
+rm -f *.builder *.ring.gz backups/*.builder backups/*.ring.gz
+
+swift-ring-builder object.builder create 10 3 1
+swift-ring-builder object.builder add r1z1-192.168.1.37:6010/192.168.1.165:8123 4096
+swift-ring-builder object.builder add r1z1-192.168.1.38:6010/192.168.1.166:8123 4096
+swift-ring-builder object.builder add r1z2-192.168.1.39:6010/192.168.1.167:8123 4096
+swift-ring-builder object.builder add r1z2-192.168.1.37:6010/192.168.1.168:8123 4096
+swift-ring-builder object.builder add r1z3-192.168.1.38:6010/192.168.1.169:8123 4096
+swift-ring-builder object.builder add r1z3-192.168.1.39:6010/192.168.1.170:8123 4096
+swift-ring-builder object.builder add r1z4-192.168.1.37:6010/192.168.1.171:8123 4096
+swift-ring-builder object.builder add r1z4-192.168.1.38:6010/192.168.1.172:8123 4096
+swift-ring-builder object.builder rebalance
+swift-ring-builder container.builder create 10 3 1
+swift-ring-builder container.builder add r1z1-192.168.1.37:6011/sdb1 1000
+swift-ring-builder container.builder add r1z2-192.168.1.38:6011/sdb1 1000
+swift-ring-builder container.builder add r1z3-192.168.1.39:6011/sdb1 1000
+swift-ring-builder container.builder rebalance
+swift-ring-builder account.builder create 10 3 1
+swift-ring-builder account.builder add r1z1-192.168.1.37:6012/sdb1 1000
+swift-ring-builder account.builder add r1z2-192.168.1.38:6012/sdb1 1000
+swift-ring-builder account.builder add r1z3-192.168.1.39:6012/sdb1 1000
+swift-ring-builder account.builder rebalance
+
+scp /etc/swift/*.gz root@192.168.1.38:/etc/swift
+scp /etc/swift/*.gz root@192.168.1.39:/etc/swift
